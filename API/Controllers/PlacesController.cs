@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Infraestructure.Data;
 using Core.Entitys;
 using Microsoft.EntityFrameworkCore;
+using Core.Interfaces;
 
 namespace API.Controllers
 {
@@ -13,22 +14,24 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class PlacesController : ControllerBase
     {
-        //injection of de dbcontext to this controller
-        private readonly AplicationDbContext _db;
-       public PlacesController(AplicationDbContext db)
+        //injection of the Iplacerepository to this controller
+        public readonly IPlaceRepository _IPR;
+       public PlacesController(IPlaceRepository IPR)
        {
-           _db=db;
+            _IPR = IPR;
+          
        }
         //never forguet make asynk the method get by this way!!
         [HttpGet]
         public async Task<ActionResult<List<Place>>> GetPlaces(){
-            var Places= await _db.Places.ToListAsync();
+            var Places= await _IPR.GetPlacesAsynk();
             return Ok(Places);
+           
         }
 
         [HttpGet ("{id}")]
         public async Task<ActionResult<Place>> GetPlace(int id){
-            var Place= await _db.Places.FindAsync(id);
+            var Place= await _IPR.GetPlaceAsynk(id);
             return Place;
         }
     }

@@ -1,3 +1,5 @@
+using System.Linq.Expressions;
+using Core.Interfaces;
 using Infraestructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,7 +18,29 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+#region servicios
+//codo meda by me adding the repositories
+builder.Services.AddScoped<IPlaceRepository, PlaceRepository>();
+#endregion
+
 var app = builder.Build();
+
+//apply new migrations after run API (just update data base entities)
+#region use it to automigrate with the "try" and show error message with the "catch"
+using(var scope= app.Services.CreateScope()){
+    var services = scope.ServiceProvider;
+    var loggerFactory= services.GetRequiredService<ILoggerFactory>();
+    try{
+        var context = services.GetRequiredService<AplicationDbContext>();
+        await context.Database.MigrateAsync();
+
+        //this line provides to of an initial information for the DB
+        await DataBaseSeed.SeedAsync(context, loggerFactory);
+    }
+    catch(System.Exception ex){var logger= loggerFactory.CreateLogger<Program>();
+    logger.LogError(ex, "Error in migration");}
+}
+#endregion
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
