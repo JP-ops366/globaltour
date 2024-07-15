@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using API.Helpers;
 using Core.Interfaces;
 using Infraestructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,10 @@ builder.Services.AddSwaggerGen();
 #region servicios
 //codo meda by me adding the repositories
 builder.Services.AddScoped<IPlaceRepository, PlaceRepository>();
+
+builder.Services.AddScoped(typeof(IRepository<>),typeof(Repository<>));
+
+builder.Services.AddAutoMapper(typeof(MappingProfiles));
 #endregion
 
 var app = builder.Build();
@@ -34,7 +39,7 @@ using(var scope= app.Services.CreateScope()){
         var context = services.GetRequiredService<AplicationDbContext>();
         await context.Database.MigrateAsync();
 
-        //this line provides to of an initial information for the DB
+        //this line provides us of an initial information for the DB
         await DataBaseSeed.SeedAsync(context, loggerFactory);
     }
     catch(System.Exception ex){var logger= loggerFactory.CreateLogger<Program>();
@@ -53,6 +58,9 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseHttpsRedirection();
+
+//add this line for use the images in wwwroot
+app.UseStaticFiles();
 
 app.UseAuthorization();
 
