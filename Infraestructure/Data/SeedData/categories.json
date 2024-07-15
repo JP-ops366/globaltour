@@ -1,0 +1,27 @@
+[
+  {
+    "Id": 1,
+    "Name": "Sustentabilidad",
+    "State": true
+  },
+  {
+    "Id": 2,
+    "Name": "Familia",
+    "State": true
+  },
+  {
+    "Id": 3,
+    "Name": "Aventuras",
+    "State": true
+  },
+  {
+    "Id": 4,
+    "Name": "Naturaleza",
+    "State": true
+  },
+  {
+    "Id": 5,
+    "Name": "Cultura",
+    "State": true
+  }
+]
