@@ -1,8 +1,12 @@
 using System.Linq.Expressions;
 using API.Helpers;
+using API.Error;
+using API.MiddleWare;
 using Core.Interfaces;
 using Infraestructure.Data;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Validations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,10 +29,25 @@ builder.Services.AddScoped<IPlaceRepository, PlaceRepository>();
 
 builder.Services.AddScoped(typeof(IRepository<>),typeof(Repository<>));
 
+//Configuration of errors
+builder.Services.Configure<ApiBehaviorOptions>(options=>{options.InvalidModelStateResponseFactory= actionContext=>
+{
+  var Errors=actionContext.ModelState.Where(e=>e.Value.Errors.Count>0)
+  .SelectMany(x=>x.Value.Errors)
+  .Select(x=>x.ErrorMessage)
+  .ToArray();
+  var errorresponse= new ApliValidationErrorsRespond{
+   Errors=Errors
+  };
+  return new BadRequestObjectResult(errorresponse);
+};});
+
 builder.Services.AddAutoMapper(typeof(MappingProfiles));
 #endregion
 
 var app = builder.Build();
+//This line is uses for the exception controll
+app.UseMiddleware<ExceptionMiddleWare>();
 
 //apply new migrations after run API (just update data base entities)
 #region use it to automigrate with the "try" and show error message with the "catch"
@@ -61,6 +80,8 @@ app.UseHttpsRedirection();
 
 //add this line for use the images in wwwroot
 app.UseStaticFiles();
+//code for make exception controll
+app.UseStatusCodePagesWithReExecute("/Error/{0}");
 
 app.UseAuthorization();
 

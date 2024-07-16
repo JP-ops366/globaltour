@@ -10,6 +10,8 @@ using Core.Interfaces;
 using Core.Especifications;
 using AutoMapper;
 using API.DTOs;
+using API.Error;
+using Microsoft.OpenApi.Models;
 
 namespace API.Controllers
 {
@@ -41,9 +43,14 @@ namespace API.Controllers
         }
 
         [HttpGet ("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse),StatusCodes.Status404NotFound)]
         public async Task<ActionResult<Place>> GetPlace(int id){
             var especification = new LugaresConPaisCAtegoriasEspecificacion(id);
             var Place= await _IPR.GetEspecification(especification);
+
+             if (Place==null) return NotFound(new ApiResponse(404,null));
+
             return Place;
         }
 
